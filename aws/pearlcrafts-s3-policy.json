@@ -1,0 +1,23 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ListPearlcraftsUploadBucket",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket"
+      ],
+      "Resource": "arn:aws:s3:::pearlcrafts-fashion-world-uploads-338970088142"
+    },
+    {
+      "Sid": "ManagePearlcraftsUploadObjects",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": "arn:aws:s3:::pearlcrafts-fashion-world-uploads-338970088142/*"
+    }
+  ]
+}

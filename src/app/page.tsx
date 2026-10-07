@@ -1,5 +1,12 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import ProductCard from "@/components/products/ProductCard";
+import { products } from "@/lib/products";
+import Link from "next/link";
+//import Image from "next/image";
+import HeroCarousel from "@/components/home/HeroCarousel";
+import CollectionShowcase from "@/components/home/CollectionShowcase";
+import FeaturedProducts from "@/components/home/FeaturedProducts";
 
 export default function Home() {
   return (
@@ -15,11 +22,11 @@ export default function Home() {
                 Handmade Elegance
               </p>
 
-              <h2 className="text-5xl font-bold leading-tight md:text-7xl">
+              <h1 className="text-5xl font-bold leading-tight md:text-7xl">
                 Elegance,
                 <br />
                 Crafted For You.
-              </h2>
+              </h1>
 
               <p className="mt-6 max-w-xl text-lg leading-8 text-gray-600">
                 Discover beautifully crafted fascinators, headpieces and hair
@@ -29,37 +36,22 @@ export default function Home() {
 
               <div className="mt-8 flex flex-wrap gap-4">
                 <a
-                  href="#collections"
+                  href="products"
                   className="rounded-full bg-black px-8 py-4 font-semibold text-white transition hover:bg-gray-800"
                 >
                   Shop Collection
                 </a>
-
-                <a
-                  href="#order"
-                  className="rounded-full border border-black px-8 py-4 font-semibold transition hover:bg-black hover:text-white"
-                >
-                  Custom Order
-                </a>
               </div>
             </div>
 
-            {/* Hero image placeholder */}
-            <div className="flex min-h-[500px] items-center justify-center rounded-3xl bg-gray-200">
-              <div className="text-center text-gray-500">
-                <p className="text-6xl">👒</p>
+           
+         <div className="w-full lg:w-2/2">
+           <HeroCarousel />
+           </div>
 
-                <p className="mt-4 font-semibold">
-                  PEARLCRAFTS FASHION WORLD
-                </p>
-
-                <p className="text-sm">
-                  Your hero image will go here
-                </p>
-              </div>
-            </div>
           </div>
         </section>
+        <CollectionShowcase />
 
         {/* Collections */}
         <section id="collections" className="px-6 py-24">
@@ -101,48 +93,10 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Featured Products */}
-        <section className="bg-[#f8f5f1] px-6 py-24">
-          <div className="mx-auto max-w-7xl">
-            <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-gray-500">
-                  Our Work
-                </p>
+      {/* Featured Products */}
+<FeaturedProducts />
 
-                <h2 className="mt-3 text-4xl font-bold">
-                  Featured Designs
-                </h2>
-              </div>
-
-              <a
-                href="#collections"
-                className="font-semibold underline"
-              >
-                View All Collections →
-              </a>
-            </div>
-
-            <div className="mt-12 grid gap-6 md:grid-cols-3">
-              <ProductCard
-                name="Royal Pearl Fascinator"
-                price="UGX 180,000"
-              />
-
-              <ProductCard
-                name="Elegant Bridal Headpiece"
-                price="UGX 250,000"
-              />
-
-              <ProductCard
-                name="Classic Black Fascinator"
-                price="UGX 150,000"
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Video Section */}
+        {/* Videos */}
         <section id="videos" className="px-6 py-24">
           <div className="mx-auto max-w-7xl">
             <div className="text-center">
@@ -162,9 +116,7 @@ export default function Home() {
 
             <div className="mt-12 grid gap-6 md:grid-cols-3">
               <VideoCard title="Fascinator Showcase" />
-
               <VideoCard title="Behind The Scenes" />
-
               <VideoCard title="Bridal Collection" />
             </div>
           </div>
@@ -192,7 +144,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Order CTA */}
+        {/* Order */}
         <section id="order" className="px-6 py-24">
           <div className="mx-auto max-w-5xl rounded-3xl bg-[#f8f5f1] px-8 py-20 text-center">
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-gray-500">
@@ -208,9 +160,12 @@ export default function Home() {
               beautiful headpiece specially for you.
             </p>
 
-            <button className="mt-8 rounded-full bg-black px-10 py-4 font-semibold text-white hover:bg-gray-800">
-              Start Your Order
-            </button>
+           <Link
+  href="/custom-order"
+  className="mt-8 inline-block rounded-full bg-gradient-to-r from-pink-600 via-fuchsia-500 to-purple-600 px-10 py-4 font-semibold text-white shadow-lg transition hover:scale-105 hover:shadow-xl"
+>
+  Start Your Order
+</Link>
           </div>
         </section>
       </main>
@@ -219,8 +174,6 @@ export default function Home() {
     </>
   );
 }
-
-/* Collection Card */
 
 function CollectionCard({
   icon,
@@ -245,55 +198,15 @@ function CollectionCard({
         {description}
       </p>
 
-      <a
-        href="#order"
-        className="mt-6 inline-block font-semibold underline"
-      >
-        Explore →
-      </a>
+      <Link
+  href="/products"
+  className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-pink-600 to-purple-600 px-8 py-4 font-bold text-white shadow-lg transition hover:from-pink-700 hover:to-purple-700"
+>
+  Explore
+</Link>
     </div>
   );
 }
-
-/* Product Card */
-
-function ProductCard({
-  name,
-  price,
-}: {
-  name: string;
-  price: string;
-}) {
-  return (
-    <div className="overflow-hidden rounded-3xl bg-white shadow-sm">
-      <div className="flex h-80 items-center justify-center bg-gray-200">
-        <div className="text-center text-gray-500">
-          <p className="text-5xl">👒</p>
-
-          <p className="mt-3 text-sm">
-            Product Image
-          </p>
-        </div>
-      </div>
-
-      <div className="p-6">
-        <h3 className="text-xl font-bold">
-          {name}
-        </h3>
-
-        <p className="mt-2 font-semibold">
-          {price}
-        </p>
-
-        <button className="mt-5 w-full rounded-full bg-black px-6 py-3 font-semibold text-white hover:bg-gray-800">
-          View Product
-        </button>
-      </div>
-    </div>
-  );
-}
-
-/* Video Card */
 
 function VideoCard({
   title,
