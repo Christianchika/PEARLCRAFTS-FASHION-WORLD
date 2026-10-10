@@ -31,7 +31,10 @@ export default function CustomOrderStatusForm({
 }: Props) {
   const router = useRouter();
 
-  const availableStatuses = TRANSITIONS[currentStatus];
+  // QUOTED is reached by saving a quotation (price), not from this list.
+  const availableStatuses = (
+    TRANSITIONS[currentStatus] as readonly string[]
+  ).filter((s) => s !== "QUOTED");
 
   const [status, setStatus] = useState<string>(
     availableStatuses[0] ?? currentStatus

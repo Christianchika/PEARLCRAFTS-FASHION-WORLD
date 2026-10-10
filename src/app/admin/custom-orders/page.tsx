@@ -118,6 +118,7 @@ export default async function AdminCustomOrdersPage({
                 <th className="px-5 py-4">Qty</th>
                 <th className="px-5 py-4">Files</th>
                 <th className="px-5 py-4">Status</th>
+                <th className="px-5 py-4">Quote</th>
                 <th className="px-5 py-4">Submitted</th>
               </tr>
             </thead>
@@ -184,6 +185,15 @@ export default async function AdminCustomOrdersPage({
                     >
                       {label(order.status)}
                     </span>
+                  </td>
+                  <td className="whitespace-nowrap px-5 py-4">
+                    {order.quotedAmount !== null ? (
+                      <span className="font-bold text-[#35102f]">
+                        UGX {order.quotedAmount.toLocaleString("en-US")}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">Not quoted</span>
+                    )}
                   </td>
                   <td className="whitespace-nowrap px-5 py-4 text-gray-500">
                     {order.createdAt.toLocaleDateString("en-GB", {

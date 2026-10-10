@@ -82,6 +82,10 @@ model CustomOrder {
   quantity             Int                        @default(1)
   description          String
   deliveryMethod       String?
+  quotedAmount         Int?
+  quoteNotes           String?
+  quoteValidUntil      DateTime?
+  quotedAt             DateTime?
   status               CustomOrderStatus          @default(PENDING)
   createdAt            DateTime                   @default(now())
   updatedAt            DateTime                   @updatedAt

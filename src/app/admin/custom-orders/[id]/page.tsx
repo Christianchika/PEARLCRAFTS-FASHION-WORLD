@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
 import CustomOrderStatusForm from "@/components/admin/CustomOrderStatusForm";
+import CustomOrderQuoteForm from "@/components/admin/CustomOrderQuoteForm";
 
 export const dynamic = "force-dynamic";
 
@@ -265,6 +266,31 @@ export default async function AdminCustomOrderDetailPage({
             ))}
           </ol>
         )}
+      </section>
+
+      <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-extrabold text-[#35102f]">
+          Quotation
+        </h2>
+        <p className="mt-1 text-sm text-gray-500">
+          Set the price and send it to the customer.
+        </p>
+        <CustomOrderQuoteForm
+          orderId={order.id}
+          status={order.status}
+          fullName={order.fullName}
+          phone={order.phone}
+          email={order.email}
+          itemType={order.itemType}
+          quantity={order.quantity}
+          quotedAmount={order.quotedAmount}
+          quoteNotes={order.quoteNotes}
+          quoteValidUntil={
+            order.quoteValidUntil
+              ? order.quoteValidUntil.toISOString().slice(0, 10)
+              : ""
+          }
+        />
       </section>
 
       <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm">

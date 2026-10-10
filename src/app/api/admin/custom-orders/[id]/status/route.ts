@@ -82,6 +82,16 @@ export async function PATCH(
 
   const requestedStatus = status as Status;
 
+  if (requestedStatus === "QUOTED") {
+    return NextResponse.json(
+      {
+        error:
+          "Use the quotation form to set a price. The order moves to QUOTED when the quotation is saved.",
+      },
+      { status: 400 }
+    );
+  }
+
   try {
     const result = await prisma.$transaction(async (tx) => {
       const existingOrder = await tx.customOrder.findUnique({
