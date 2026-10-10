@@ -4,17 +4,17 @@ import { useState } from "react";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-const STATUSES = [
-  "PENDING",
-  "REVIEWED",
-  "QUOTED",
-  "ACCEPTED",
-  "IN_PROGRESS",
-  "COMPLETED",
-  "CANCELLED",
-] as const;
+const TRANSITIONS = {
+  PENDING: ["REVIEWED", "CANCELLED"],
+  REVIEWED: ["QUOTED", "CANCELLED"],
+  QUOTED: ["ACCEPTED", "CANCELLED"],
+  ACCEPTED: ["IN_PROGRESS", "CANCELLED"],
+  IN_PROGRESS: ["COMPLETED", "CANCELLED"],
+  COMPLETED: [],
+  CANCELLED: [],
+} as const;
 
-type Status = (typeof STATUSES)[number];
+type Status = keyof typeof TRANSITIONS;
 
 function label(status: string) {
   return status.replace("_", " ");
@@ -31,13 +31,16 @@ export default function CustomOrderStatusForm({
 }: Props) {
   const router = useRouter();
 
-  const [status, setStatus] = useState<Status>(currentStatus);
+  const availableStatuses = TRANSITIONS[currentStatus];
+
+  const [status, setStatus] = useState<string>(
+    availableStatuses[0] ?? currentStatus
+  );
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
   async function handleSave() {
-    if (status === currentStatus) {
-      setMessage("No status change to save.");
+    if (!availableStatuses.includes(status as never)) {
       return;
     }
 
@@ -70,11 +73,20 @@ export default function CustomOrderStatusForm({
           ? error.message
           : "Failed to update status."
       );
-
-      setStatus(currentStatus);
     } finally {
       setSaving(false);
     }
+  }
+
+  if (availableStatuses.length === 0) {
+    return (
+      <div className="mt-5 rounded-2xl bg-gray-50 p-5">
+        <p className="text-sm font-semibold text-gray-500">
+          This order is {label(currentStatus).toLowerCase()} and has no
+          further status changes available.
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -90,13 +102,11 @@ export default function CustomOrderStatusForm({
         <select
           id="custom-order-status"
           value={status}
-          onChange={(event) =>
-            setStatus(event.target.value as Status)
-          }
+          onChange={(event) => setStatus(event.target.value)}
           disabled={saving}
           className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-800 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
         >
-          {STATUSES.map((item) => (
+          {availableStatuses.map((item) => (
             <option key={item} value={item}>
               {label(item)}
             </option>
@@ -106,7 +116,7 @@ export default function CustomOrderStatusForm({
         <button
           type="button"
           onClick={handleSave}
-          disabled={saving || status === currentStatus}
+          disabled={saving}
           className="inline-flex items-center justify-center gap-2 rounded-xl bg-purple-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-pink-600 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {saving ? (
@@ -128,7 +138,7 @@ export default function CustomOrderStatusForm({
           className={`mt-3 text-sm font-semibold ${
             message.includes("successfully")
               ? "text-emerald-600"
-              : "text-gray-600"
+              : "text-red-600"
           }`}
         >
           {message}

@@ -71,35 +71,51 @@ enum OrderStatus {
 }
 
 model CustomOrder {
-  id              String               @id @default(cuid())
-  fullName        String
-  phone           String
-  email           String?
-  location        String
-  itemType        String
-  occasion        String?
-  preferredColour String?
-  quantity        Int                  @default(1)
-  description     String
-  deliveryMethod  String?
-  status          CustomOrderStatus    @default(PENDING)
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
+  id                   String                     @id @default(cuid())
+  fullName             String
+  phone                String
+  email                String?
+  location             String
+  itemType             String
+  occasion             String?
+  preferredColour      String?
+  quantity             Int                        @default(1)
+  description          String
+  deliveryMethod       String?
+  status               CustomOrderStatus          @default(PENDING)
+  createdAt            DateTime                   @default(now())
+  updatedAt            DateTime                   @updatedAt
+  attachments          CustomOrderAttachment[]
+  uploads              CustomOrderUpload[]
+  uploadTokenHash      String?                    @unique
+  uploadTokenExpiresAt DateTime?
+  statusHistory        CustomOrderStatusHistory[]
+}
 
-  attachments     CustomOrderAttachment[]
-uploads               CustomOrderUpload[]
-uploadTokenHash       String?   @unique
-uploadTokenExpiresAt  DateTime?
+model CustomOrderStatusHistory {
+  id             String             @id @default(cuid())
+  customOrderId  String
+  fromStatus     CustomOrderStatus?
+  toStatus       CustomOrderStatus
+  changedById    String?
+  changedByName  String?
+  changedByEmail String?
+  createdAt      DateTime           @default(now())
+
+  customOrder CustomOrder @relation(fields: [customOrderId], references: [id], onDelete: Cascade)
+
+  @@index([customOrderId])
+  @@index([createdAt])
 }
 
 model CustomOrderAttachment {
-  id            String      @id @default(cuid())
+  id            String   @id @default(cuid())
   customOrderId String
   fileName      String
   fileUrl       String
   contentType   String?
   fileSize      Int?
-  createdAt     DateTime    @default(now())
+  createdAt     DateTime @default(now())
 
   customOrder CustomOrder @relation(fields: [customOrderId], references: [id], onDelete: Cascade)
 }
@@ -122,6 +138,7 @@ model AdminUser {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
+
 model CustomOrderUpload {
   id            String       @id @default(cuid())
   customOrderId String
