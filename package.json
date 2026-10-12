@@ -2,7 +2,11 @@
   "name": "pearlcrafts-fashion-world",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
+  "overrides": {
+    "deepmerge-ts": "^8.0.2",
+    "mysql2": "^3.24.5"
+},
+"scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
