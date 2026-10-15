@@ -90,6 +90,7 @@ model CustomOrder {
   uploadTokenHash      String?                    @unique
   uploadTokenExpiresAt DateTime?
   statusHistory        CustomOrderStatusHistory[]
+  quotations CustomOrderQuotation[]
 }
 
 model CustomOrderStatusHistory {
@@ -172,4 +173,54 @@ model Video {
   updatedAt   DateTime @updatedAt
 
   @@index([isPublished, sortOrder])
+}
+
+enum QuotationStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+model CustomOrderQuotation {
+  id                    String          @id @default(cuid())
+  customOrderId         String
+  quotationNumber       String          @unique
+  status                QuotationStatus @default(DRAFT)
+  currency              String          @default("UGX")
+  subtotal              Int             @default(0)
+  deliveryFee           Int             @default(0)
+  additionalFees        Int             @default(0)
+  totalAmount           Int             @default(0)
+  estimatedCompletion   String?
+  paymentTerms          String?
+  notes                 String?
+  validUntil             DateTime?
+  sentAt                 DateTime?
+  customerRespondedAt    DateTime?
+  createdByName          String?
+  createdByEmail         String?
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+
+  customOrder CustomOrder          @relation(fields: [customOrderId], references: [id], onDelete: Cascade)
+  items       CustomOrderQuoteItem[]
+
+  @@index([customOrderId, createdAt])
+  @@index([status])
+}
+
+model CustomOrderQuoteItem {
+  id          String                @id @default(cuid())
+  quotationId String
+  description String
+  quantity    Int
+  unitPrice   Int
+  lineTotal   Int
+  createdAt   DateTime              @default(now())
+
+  quotation CustomOrderQuotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+
+  @@index([quotationId])
 }

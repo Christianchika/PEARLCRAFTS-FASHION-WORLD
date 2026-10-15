@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
 import CustomOrderStatusForm from "@/components/admin/CustomOrderStatusForm";
+import CustomOrderQuotationManager from "@/components/admin/CustomOrderQuotationManager";
 
 export const dynamic = "force-dynamic";
 
@@ -52,11 +53,13 @@ export default async function AdminCustomOrderDetailPage({
         Back to Custom Orders
       </Link>
 
+      {/* Page heading */}
       <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <div className="rounded-2xl bg-pink-100 p-3 text-pink-600">
             <Sparkles size={24} />
           </div>
+
           <div>
             <h1 className="text-2xl font-extrabold text-[#35102f]">
               Custom Design Request
@@ -74,15 +77,21 @@ export default async function AdminCustomOrderDetailPage({
         </span>
       </div>
 
+      {/* Customer and design information */}
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
         <section className="rounded-3xl bg-white p-6 shadow-sm">
           <h2 className="text-lg font-extrabold text-[#35102f]">
             Customer Information
           </h2>
+
           <div className="mt-5 space-y-4">
             <Info label="Full Name" value={order.fullName} />
             <Info label="Phone" value={order.phone} />
-            {order.email && <Info label="Email" value={order.email} />}
+
+            {order.email && (
+              <Info label="Email" value={order.email} />
+            )}
+
             <Info label="Location" value={order.location} />
           </div>
         </section>
@@ -91,18 +100,23 @@ export default async function AdminCustomOrderDetailPage({
           <h2 className="text-lg font-extrabold text-[#35102f]">
             Design Information
           </h2>
+
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <Info label="Item Type" value={order.itemType} />
             <Info label="Quantity" value={String(order.quantity)} />
+
             {order.occasion && (
               <Info label="Occasion" value={order.occasion} />
             )}
+
             {order.preferredColour && (
               <Info label="Preferred Colour" value={order.preferredColour} />
             )}
+
             {order.deliveryMethod && (
               <Info label="Delivery Method" value={order.deliveryMethod} />
             )}
+
             <Info
               label="Submitted"
               value={order.createdAt.toLocaleString("en-GB")}
@@ -111,10 +125,12 @@ export default async function AdminCustomOrderDetailPage({
         </section>
       </div>
 
+      {/* Customer description */}
       <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
         <h2 className="text-lg font-extrabold text-[#35102f]">
           Customer Description
         </h2>
+
         <div className="mt-4 rounded-2xl bg-pink-50 p-5">
           <p className="whitespace-pre-wrap text-gray-700">
             {order.description}
@@ -122,11 +138,13 @@ export default async function AdminCustomOrderDetailPage({
         </div>
       </section>
 
+      {/* Uploaded design and inspiration files */}
       <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="rounded-xl bg-purple-100 p-2 text-purple-700">
             <FileText size={20} />
           </div>
+
           <div>
             <h2 className="text-lg font-extrabold text-[#35102f]">
               Design / Inspiration Files
@@ -154,7 +172,11 @@ export default async function AdminCustomOrderDetailPage({
                   className="overflow-hidden rounded-2xl border border-gray-200"
                 >
                   {isImage ? (
-                    <a href={attachmentUrl} target="_blank" rel="noopener noreferrer">
+                    <a
+                      href={attachmentUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       <img
                         src={attachmentUrl}
                         alt={file.fileName}
@@ -171,6 +193,7 @@ export default async function AdminCustomOrderDetailPage({
                     <p className="min-w-0 truncate text-sm font-semibold text-gray-800">
                       {file.fileName}
                     </p>
+
                     <a
                       href={attachmentUrl}
                       target="_blank"
@@ -187,9 +210,11 @@ export default async function AdminCustomOrderDetailPage({
         )}
       </section>
 
+      {/* Status history */}
       <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
         <div className="flex items-center gap-3">
           <History size={21} className="text-purple-700" />
+
           <div>
             <h2 className="text-lg font-extrabold text-[#35102f]">
               Status History
@@ -227,6 +252,7 @@ export default async function AdminCustomOrderDetailPage({
                       >
                         {label(entry.fromStatus)}
                       </span>
+
                       <span className="text-sm font-bold text-gray-400">
                         →
                       </span>
@@ -253,9 +279,11 @@ export default async function AdminCustomOrderDetailPage({
                     timeStyle: "short",
                   })}
                 </p>
+
                 <p className="mt-1 text-sm font-semibold text-gray-800">
                   {entry.changedByName || "Administrator"}
                 </p>
+
                 {entry.changedByEmail && (
                   <p className="text-sm text-gray-500">
                     {entry.changedByEmail}
@@ -267,10 +295,37 @@ export default async function AdminCustomOrderDetailPage({
         )}
       </section>
 
+      {/* Quotation management */}
+      <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="rounded-xl bg-pink-100 p-2 text-pink-700">
+            <FileText size={20} />
+          </div>
+
+          <div>
+            <h2 className="text-lg font-extrabold text-[#35102f]">
+              Quotation Management
+            </h2>
+            <p className="text-sm text-gray-500">
+              Prepare itemized quotations for the customer’s custom design
+              request.
+            </p>
+          </div>
+        </div>
+
+        <CustomOrderQuotationManager
+          orderId={order.id}
+          orderItemType={order.itemType}
+          orderQuantity={order.quantity}
+        />
+      </section>
+
+      {/* Order management */}
       <section className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
         <h2 className="text-lg font-extrabold text-[#35102f]">
           Order Management
         </h2>
+
         <CustomOrderStatusForm
           orderId={order.id}
           currentStatus={order.status}
@@ -280,7 +335,13 @@ export default async function AdminCustomOrderDetailPage({
   );
 }
 
-function Info({ label, value }: { label: string; value: string }) {
+function Info({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
   return (
     <div>
       <p className="text-xs font-bold uppercase tracking-wide text-gray-400">
