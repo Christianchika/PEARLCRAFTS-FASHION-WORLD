@@ -199,6 +199,7 @@ model CustomOrderQuotation {
   validUntil             DateTime?
   sentAt                 DateTime?
   customerRespondedAt    DateTime?
+  shareTokenHash          String?         @unique
   createdByName          String?
   createdByEmail         String?
   createdAt              DateTime        @default(now())
@@ -223,4 +224,21 @@ model CustomOrderQuoteItem {
   quotation CustomOrderQuotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
 
   @@index([quotationId])
+}
+model StoreSettings {
+  id                       String   @id @default("store-settings")
+  storeName                String   @default("PEARLCRAFTS FASHION WORLD")
+  productFocus             String   @default("Fascinators, headpieces and hair accessories")
+  businessAddress          String   @default("")
+  businessHours            String   @default("")
+  businessEmail            String   @default("info@pearlcrafts.com")
+  businessPhone            String   @default("+256 782 595 996")
+  whatsappNumber           String   @default("+256 782 595 996")
+  facebookUrl              String   @default("https://www.facebook.com/pearlcraftsfashionworld")
+  instagramUrl             String   @default("https://www.instagram.com/pearlcrafts.fw_ug")
+  tiktokUrl                String   @default("https://www.tiktok.com/@pearlcraftsfashionworld")
+  orderNotificationsEnabled Boolean @default(false)
+  deliveryInstructions     String   @default("")
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
 }

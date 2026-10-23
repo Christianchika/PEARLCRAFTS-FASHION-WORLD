@@ -16,7 +16,12 @@ const slides = [
     image: "/products/classic-black-fascinator.jpg",
     alt: "Classic black fascinator by PEARLCRAFTS FASHION WORLD",
   },
+  {
+    image: "/image/hero-image-1.jpg",
+    alt: "Hero image 1 by PEARLCRAFTS FASHION WORLD",
+  },
 ];
+
 
 export default function HeroCarousel() {
   const [currentSlide, setCurrentSlide] = useState(0);

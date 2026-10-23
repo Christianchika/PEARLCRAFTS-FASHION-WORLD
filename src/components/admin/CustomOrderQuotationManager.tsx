@@ -1,7 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Loader2, Plus, Trash2, Save, FileText, RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Loader2,
+  Plus,
+  Trash2,
+  Save,
+  FileText,
+  RefreshCw,
+  Copy,
+  MessageCircle,
+  ExternalLink,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 
 type QuoteItem = {
@@ -35,7 +45,8 @@ type Quotation = {
 type Props = {
   orderId: string;
   orderItemType: string;
-  orderQuantity: number;
+  customerName: string;
+  customerPhone: string;
 };
 
 const initialItem = (description = ""): QuoteItem => ({
@@ -84,8 +95,10 @@ function statusStyle(status: string) {
 export default function CustomOrderQuotationManager({
   orderId,
   orderItemType,
-  orderQuantity,
+  customerName,
+  customerPhone,
 }: Props) {
+
   const router = useRouter();
 
   const [items, setItems] = useState<QuoteItem[]>([
@@ -104,6 +117,8 @@ export default function CustomOrderQuotationManager({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [sharingQuoteId, setSharingQuoteId] = useState<string | null>(null);
+const [shareLinks, setShareLinks] = useState<Record<string, string>>({});
 
   const subtotal = useMemo(
     () =>
@@ -119,10 +134,38 @@ export default function CustomOrderQuotationManager({
     (Number(deliveryFee) || 0) +
     (Number(additionalFees) || 0);
 
-  async function loadQuotations() {
-    setLoadingQuotes(true);
-    setError("");
+  const loadQuotations = useCallback(async () => {
+  setLoadingQuotes(true);
+  setError("");
 
+  try {
+    const response = await fetch(
+      `/api/admin/custom-orders/${orderId}/quotations`,
+      { cache: "no-store" }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Could not load quotations.");
+    }
+
+    setQuotations(data.quotations ?? []);
+  } catch (loadError) {
+    setError(
+      loadError instanceof Error
+        ? loadError.message
+        : "Could not load quotations."
+    );
+  } finally {
+    setLoadingQuotes(false);
+  }
+}, [orderId]);
+
+useEffect(() => {
+  let cancelled = false;
+
+  async function fetchQuotations() {
     try {
       const response = await fetch(
         `/api/admin/custom-orders/${orderId}/quotations`,
@@ -135,23 +178,31 @@ export default function CustomOrderQuotationManager({
         throw new Error(data.error || "Could not load quotations.");
       }
 
-      setQuotations(data.quotations ?? []);
+      if (!cancelled) {
+        setQuotations(data.quotations ?? []);
+        setError("");
+      }
     } catch (loadError) {
-      setError(
-        loadError instanceof Error
-          ? loadError.message
-          : "Could not load quotations."
-      );
+      if (!cancelled) {
+        setError(
+          loadError instanceof Error
+            ? loadError.message
+            : "Could not load quotations."
+        );
+      }
     } finally {
-      setLoadingQuotes(false);
+      if (!cancelled) {
+        setLoadingQuotes(false);
+      }
     }
   }
 
-  useEffect(() => {
-    void loadQuotations();
-    // orderId identifies the quotation collection for this component.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderId]);
+  void fetchQuotations();
+
+  return () => {
+    cancelled = true;
+  };
+}, [orderId]);
 
   function updateItem(
     index: number,
@@ -189,6 +240,98 @@ export default function CustomOrderQuotationManager({
         : current.filter((_, itemIndex) => itemIndex !== index)
     );
   }
+  
+  async function generateCustomerLink(quote: Quotation) {
+    setSharingQuoteId(quote.id);
+    setError("");
+    setMessage("");
+
+    try {
+      const response = await fetch(
+        `/api/admin/quotations/${encodeURIComponent(quote.id)}/share`,
+        {
+          method: "POST",
+          cache: "no-store",
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Unable to generate the customer quotation link."
+        );
+      }
+
+      if (typeof data.quotationUrl !== "string") {
+        throw new Error("The server did not return a quotation link.");
+      }
+
+      setShareLinks((current) => ({
+        ...current,
+        [quote.id]: data.quotationUrl,
+      }));
+
+      setMessage(
+        `Customer link generated for ${quote.quotationNumber}. The quotation status is now SENT. You still need to share the link with the customer.`
+      );
+
+      await loadQuotations();
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to generate the customer quotation link."
+      );
+    } finally {
+      setSharingQuoteId(null);
+    }
+  }
+
+  async function copyCustomerLink(quoteId: string) {
+    const link = shareLinks[quoteId];
+
+    if (!link) return;
+
+    try {
+      await navigator.clipboard.writeText(link);
+      setMessage("Customer quotation link copied to the clipboard.");
+      setError("");
+    } catch {
+      setError(
+        "Could not copy the link automatically. Select and copy the link displayed below."
+      );
+    }
+  }
+
+  function getWhatsAppUrl(link: string) {
+    const digits = customerPhone.replace(/\D/g, "");
+    let phone = digits;
+
+    if (phone.startsWith("00")) {
+      phone = phone.slice(2);
+    }
+
+    if (phone.startsWith("0")) {
+      phone = `256${phone.slice(1)}`;
+    } else if (phone.length === 9) {
+      phone = `256${phone}`;
+    }
+
+    const text = [
+      `Hello ${customerName},`,
+      "Your PearlCrafts quotation is ready.",
+      `Quotation link: ${link}`,
+      "Please review it and select Accept or Decline.",
+    ].join("\n");
+
+    const base = phone
+      ? `https://wa.me/${phone}`
+      : "https://wa.me/";
+
+    return `${base}?text=${encodeURIComponent(text)}`;
+  }
+
 
   async function saveDraft(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -667,10 +810,89 @@ export default function CustomOrderQuotationManager({
                   </div>
                 )}
 
-                <p className="mt-4 rounded-lg bg-amber-50 p-3 text-xs font-semibold text-amber-800">
-                  This quotation record is {quote.status.toLowerCase()}. This
-                  interface does not send it to the customer.
-                </p>
+                
+<div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4">
+  <p className="text-sm font-semibold text-gray-800">
+    {quote.status === "DRAFT"
+      ? "This quotation is saved as a draft. Generate a customer link when it is ready to share."
+      : quote.status === "SENT"
+        ? "A customer link can be generated or replaced. Generating a link does not confirm that the customer has received it."
+        : quote.status === "ACCEPTED"
+          ? "The customer has accepted this quotation."
+          : quote.status === "REJECTED"
+            ? "The customer has declined this quotation."
+            : "This quotation has expired."}
+  </p>
+
+  {(quote.status === "DRAFT" || quote.status === "SENT") && (
+    <div className="mt-3 flex flex-wrap gap-2">
+      <button
+        type="button"
+        onClick={() => void generateCustomerLink(quote)}
+        disabled={sharingQuoteId !== null}
+        className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#35102f] px-4 py-2 text-sm font-bold text-white hover:bg-purple-900 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {sharingQuoteId === quote.id ? (
+          <Loader2 size={16} className="animate-spin" />
+        ) : (
+          <ExternalLink size={16} />
+        )}
+        {sharingQuoteId === quote.id
+          ? "Generating link..."
+          : quote.status === "SENT"
+            ? "Generate New Link"
+            : "Generate Customer Link"}
+      </button>
+
+      {shareLinks[quote.id] && (
+        <>
+          <button
+            type="button"
+            onClick={() => void copyCustomerLink(quote.id)}
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-100"
+          >
+            <Copy size={16} />
+            Copy Link
+          </button>
+
+          <a
+            href={getWhatsAppUrl(shareLinks[quote.id])}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white hover:bg-green-700"
+          >
+            <MessageCircle size={16} />
+            Share via WhatsApp
+          </a>
+        </>
+      )}
+    </div>
+  )}
+
+  {shareLinks[quote.id] && (
+    <div className="mt-3">
+      <label
+        htmlFor={`quotation-link-${quote.id}`}
+        className="block text-xs font-bold uppercase tracking-wide text-gray-500"
+      >
+        Customer quotation link
+      </label>
+      <input
+        id={`quotation-link-${quote.id}`}
+        type="text"
+        readOnly
+        value={shareLinks[quote.id]}
+        onFocus={(event) => event.currentTarget.select()}
+        className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
+      />
+      <p className="mt-2 text-xs leading-5 text-gray-500">
+        Generating a new link replaces the previous link. Share this link with
+        the customer; opening WhatsApp does not itself confirm message delivery.
+      </p>
+    </div>
+  )}
+</div>
+
               </article>
             ))}
           </div>

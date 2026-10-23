@@ -22,7 +22,6 @@ export default async function AdminDashboardPage() {
     recentProducts,
     customOrderCount,
     pendingCustomOrderCount,
-    recentCustomOrders,
   ] = await Promise.all([
     prisma.product.count(),
 
@@ -66,17 +65,7 @@ export default async function AdminDashboardPage() {
       },
     }),
 
-    prisma.customOrder.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
-      take: 5,
-      include: {
-        attachments: true,
-      },
-    }),
   ]);
-
   const formatCurrency = (amount: number) =>
     `UGX ${amount.toLocaleString()}`;
 

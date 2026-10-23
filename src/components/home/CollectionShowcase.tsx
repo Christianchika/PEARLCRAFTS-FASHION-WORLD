@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+
 const collections = [
   {
     name: "Fascinators",
@@ -10,17 +11,24 @@ const collections = [
     href: "/products?category=Fascinators",
   },
   {
-    name: "Bridal",
+    name: "Boater Hats",
     description:
-      "Beautiful bridal headpieces and accessories for your unforgettable day.",
-    image: "/products/elegant-bridal-headpiece.jpg",
-    href: "/products?category=Bridal",
+      "Classic and stylish boater hats for weddings, events and elegant outings.",
+    image: "/products/classic-black-fascinator.jpg",
+    href: "/products?category=Boater%20Hats",
+  },
+  {
+    name: "Auto Gele",
+    description:
+      "Beautiful auto gele styles for a sophisticated and effortlessly elegant look.",
+    image: "/products/auto-gele.png",
+    href: "/products?category=Auto%20Gele",
   },
   {
     name: "Hair Accessories",
     description:
       "Stylish pieces designed to add beauty and personality to your hairstyle.",
-    image: "/products/classic-black-fascinator.jpg",
+    image: "/products/hair-accessories.jpg",
     href: "/products?category=Hair%20Accessories",
   },
 ];
@@ -44,7 +52,7 @@ export default function CollectionShowcase() {
           </p>
         </div>
 
-        <div className="mt-12 grid gap-8 md:grid-cols-3">
+        <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {collections.map((collection) => (
             <Link
               key={collection.name}

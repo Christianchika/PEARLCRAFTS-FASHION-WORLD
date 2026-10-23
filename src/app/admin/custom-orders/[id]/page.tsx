@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, FileText, Sparkles, History } from "lucide-react";
 import { notFound } from "next/navigation";
-
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import CustomOrderStatusForm from "@/components/admin/CustomOrderStatusForm";
 import CustomOrderQuotationManager from "@/components/admin/CustomOrderQuotationManager";
@@ -177,11 +177,17 @@ export default async function AdminCustomOrderDetailPage({
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <img
-                        src={attachmentUrl}
-                        alt={file.fileName}
-                        className="h-64 w-full bg-gray-50 object-contain"
-                      />
+                      
+<div className="relative h-64 w-full bg-gray-50">
+  <Image
+    src={attachmentUrl}
+    alt={file.fileName}
+    fill
+    sizes="(max-width: 640px) 100vw, 50vw"
+    unoptimized
+    className="object-contain"
+  />
+</div>
                     </a>
                   ) : (
                     <div className="flex h-64 items-center justify-center bg-gray-50">
@@ -314,10 +320,11 @@ export default async function AdminCustomOrderDetailPage({
         </div>
 
         <CustomOrderQuotationManager
-          orderId={order.id}
-          orderItemType={order.itemType}
-          orderQuantity={order.quantity}
-        />
+  orderId={order.id}
+  orderItemType={order.itemType}
+  customerName={order.fullName}
+  customerPhone={order.phone}
+/>
       </section>
 
       {/* Order management */}

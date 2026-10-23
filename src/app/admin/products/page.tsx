@@ -95,11 +95,13 @@ export default async function AdminProductsPage() {
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-4">
                         <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-pink-50">
-                          <img
-                            src={product.imageUrl}
-                            alt={product.name}
-                            className="h-full w-full object-cover"
-                          />
+                          <Image
+  src={product.imageUrl}
+  alt={product.name}
+  fill
+  sizes="64px"
+  className="object-cover"
+/>
                         </div>
 
                         <div>

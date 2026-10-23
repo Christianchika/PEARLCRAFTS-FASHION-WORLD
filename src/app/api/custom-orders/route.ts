@@ -35,7 +35,7 @@ const fileExtensions: Record<string, string> = {
 };
 
 export async function POST(request: NextRequest) {
-  let orderId: string | undefined;
+  //let orderId: string | undefined;
 
   try {
     const body = await request.json();
@@ -199,7 +199,6 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    orderId = order.id;
 
     try {
       const uploads = await Promise.all(
